@@ -2992,6 +2992,7 @@ class LockCachingResolvingAudioSource extends StreamAudioSource {
   }
 
   Future<void> _init() async {
+    _downloading = _downloadingList.contains(uniqueId);
     final cacheFile = await this.cacheFile;
     _downloadProgressSubject.add((await cacheFile.exists()) ? 1.0 : 0.0);
   }
