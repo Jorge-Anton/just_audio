@@ -2966,6 +2966,7 @@ class LockCachingResolvingAudioSource extends StreamAudioSource {
   int _progress = 0;
   final _requests = <_StreamingByteRangeRequest>[];
   final _downloadProgressSubject = BehaviorSubject<double>();
+  static final List<String> _downloadingList = [];
   bool _downloading = false;
 
   /// It is just as [LockCachingAudioSource] but with no need for providing a [uri], it only
@@ -3062,6 +3063,7 @@ class LockCachingResolvingAudioSource extends StreamAudioSource {
   Future<HttpClientResponse> _fetch() async {
     final Uri uri = await resolveSoundUrl(uniqueId) ?? Uri.parse(''); 
     _downloading = true;
+    _downloadingList.add(uniqueId);
     final cacheFile = await this.cacheFile;
     final partialCacheFile = await _partialCacheFile;
 
@@ -3222,6 +3224,7 @@ class LockCachingResolvingAudioSource extends StreamAudioSource {
       await subscription.cancel();
       httpClient.close();
       _downloading = false;
+      _downloadingList.remove(uniqueId);
     }, onError: (Object e, StackTrace stackTrace) async {
       (await _partialCacheFile).deleteSync();
       httpClient.close();
@@ -3236,6 +3239,7 @@ class LockCachingResolvingAudioSource extends StreamAudioSource {
         res.controller.close();
       }
       _downloading = false;
+      _downloadingList.remove(uniqueId);
     }, cancelOnError: true);
     return response;
   }
